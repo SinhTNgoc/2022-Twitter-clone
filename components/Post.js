@@ -41,7 +41,7 @@ const Post = ({ post }) => {
               src={post.img}
               alt="user-image"
               layout="fill"
-              className="cursor-pointer rounded-2xl hover:brightness-95"
+              className="cursor-pointer rounded-2xl hover:brightness-110"
             ></Image>
           </div>
         </div>
