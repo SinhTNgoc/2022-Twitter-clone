@@ -42,6 +42,7 @@ const Post = ({ post }) => {
               alt="user-image"
               layout="fill"
               className="cursor-pointer rounded-2xl hover:brightness-110"
+              priority
             ></Image>
           </div>
         </div>
