@@ -42,7 +42,7 @@ const Sidebar = () => {
       <button className="bg-blue-400 text-white rounded-full w-56 h-12 font-bold shadow-md hover:brightness-95 text-lg hidden xl:inline">
         Tweet
       </button>
-      <div className="hoverEffect text-gray-700 flex items-center justify-center xl:justify-start mt-auto xl:space-x-2">
+      <div className="hoverEffect text-gray-700 flex items-center justify-center xl:justify-start mt-auto xl:space-x-2 ">
         <Image
           src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT6e3hgpI2STnxrTplbTPL1QR1QsymN7P68rGkJj0Go9YZwiQX3P3lOHviSnHRwmKKuSVw&usqp=CAU"
           alt="user-image"
@@ -51,7 +51,8 @@ const Sidebar = () => {
           className="rounded-full"
           onClick={handleClick}
         ></Image>
-        <div className="leading-5">
+
+        <div className="leading-5 hidden xl:block">
           <h4 className="font-bold">Chicken1102</h4>
           <p className="text-gray-500">@ga vl</p>
         </div>
