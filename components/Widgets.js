@@ -42,8 +42,8 @@ const Widgets = ({ newsResults, randomUserFollow }) => {
               alt={user.name.last}
               className="w-[50px] h-[50px] rounded-full mr-3 "
             />
-            <div className="">
-              <h4 className="font-bold text-medium">{user.login.username}</h4>
+            <div className="truncate leading-5">
+              <h4 className="font-bold text-[16px] hover:underline">{user.login.username}</h4>
               <h5 className="text-xs font-medium text-gray-500">
                 {user.name.first + " " + user.name.last}
               </h5>
