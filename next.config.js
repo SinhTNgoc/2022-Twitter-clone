@@ -24,6 +24,7 @@ const nextConfig = {
       "s.yimg.com",
       "d32r1sh890xpii.cloudfront.net",
       "www.orlandosentinel.com",
+      "lh3.googleusercontent.com",
     ],
   },
 };
