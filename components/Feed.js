@@ -1,30 +1,23 @@
 import { SparklesIcon } from "@heroicons/react/outline";
+import { useEffect, useState } from "react";
 import Input from "./Input";
 import Post from "./Post";
+import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
+import { db } from "../firebase";
 
 const Feed = () => {
-  const posts = [
-    {
-      id: 1,
-      name: "Chicken1102",
-      username: "Relax",
-      userImg:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT6e3hgpI2STnxrTplbTPL1QR1QsymN7P68rGkJj0Go9YZwiQX3P3lOHviSnHRwmKKuSVw&usqp=CAU",
-      img: "https://images.unsplash.com/photo-1437915160026-6c59da36ede2?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80",
-      text: "Ahihi",
-      timestamp: "2 hours ago",
-    },
-    {
-      id: 2,
-      name: "Chicken1103",
-      username: "Relax",
-      userImg:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT6e3hgpI2STnxrTplbTPL1QR1QsymN7P68rGkJj0Go9YZwiQX3P3lOHviSnHRwmKKuSVw&usqp=CAU",
-      img: "https://images.unsplash.com/photo-1651661268931-607e69852087?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80",
-      text: "hello hello",
-      timestamp: " 2 days ago",
-    },
-  ];
+  const [posts, setPosts] = useState([]);
+
+  useEffect(() => {
+    return () =>
+      onSnapshot(
+        query(collection(db, "posts"), orderBy("timestamp", "desc")),
+        (snapshot) => {
+          setPosts(snapshot.docs);
+        }
+      );
+  }, []);
+
   return (
     <div className="xl:ml-[240px] border-l border-r xl:min-w-[576px] sm:ml-[73px] flex-grow max-w-xl">
       <div className="flex items-center  py-2 px-3 sticky top-0 z-50 bg-white border-b border-gray-200">
@@ -34,7 +27,9 @@ const Feed = () => {
         </div>
       </div>
       <Input />
-      {posts.map(post=>(<Post key={post.id} post={post}/>))}
+      {posts.map((post, index) => (
+        <Post key={post.id} post={post} />
+      ))}
     </div>
   );
 };
