@@ -5,24 +5,74 @@ import {
   ShareIcon,
   TrashIcon,
 } from "@heroicons/react/outline";
+import { HeartIcon as HeartIconFilled } from "@heroicons/react/solid";
 import { DotsHorizontalIcon } from "@heroicons/react/solid";
+import {
+  setDoc,
+  doc,
+  onSnapshot,
+  collection,
+  deleteDoc,
+} from "firebase/firestore";
+import { signIn, useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
 
 import Moment from "react-moment";
+import { db } from "../firebase";
 
 const Post = ({ post }) => {
+  const [likes, setLikes] = useState([]);
+  const [hasLiked, setHasLiked] = useState(false);
+
+  const { data: session } = useSession();
+  console.log(session);
+
+  useEffect(() => {
+    const unsubcribe = onSnapshot(
+      collection(db, "posts", post.id, "likes"),
+      (snapshot) => {
+        setLikes(snapshot.docs);
+      }
+    );
+  }, [post.id]);
+
+  useEffect(() => {
+    setHasLiked(
+      likes.findIndex((like) => like.id === session?.user?.uid) !== -1
+    );
+  }, [likes, session?.user?.uid]);
+
+  console.log({ hasLiked });
+
+  const likePost = async () => {
+    if(session) {
+      if (!hasLiked) {
+        await setDoc(doc(db, "posts", post.id, "likes", session?.user?.uid), {
+          username: session?.user?.username,
+        });
+      } else {
+        await deleteDoc(doc(db, "posts", post.id, "likes", session?.user?.uid), {
+          username: session?.user?.username,
+        });
+      }
+    }else {
+      signIn("/auth/sigin")
+    }
+    
+  };
   return (
     <div className="p-3 flex space-x-3 cursor-pointer border-b border-gray-200">
-      <div className="">
+      <div className="w-[45px]">
         <img
           src={
             post?.data()?.userImg ||
             "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_QNkOSdhUIABFqXCeR_YvGF-IAU4T7waAoQ&usqp=CAU"
           }
           alt="user-image"
-          className="w-[56px] h-[50px] rounded-full object-cover cursor-pointer hover:brightness-95"
+          className="w-[45px] h-[45px] rounded-full object-cover cursor-pointer hover:brightness-90"
         />
       </div>
-      <div className="flex flex-col w-full">
+      <div className="flex flex-col w-[85%] sm:w-[90%]">
         <div className="flex justify-between">
           <div className="flex items-center space-x-2 whitespace-nowrap">
             <h4 className="font-bold text-[15px] sm:text-[16px] hover:underline">
@@ -47,14 +97,26 @@ const Post = ({ post }) => {
               alt="user-image"
               layout="fill"
               className="cursor-pointer rounded-2xl hover:brightness-110"
-              priority
             />
           </div>
         </div>
         <div className="flex justify-between text-gray-500 py-2">
           <ChatAltIcon className="h-9 w-9 hoverEffect p-2 hover:text-sky-500 hover:bg-sky-100" />
           <TrashIcon className="h-9 w-9 hoverEffect p-2 hover:text-red-600 hover:bg-red-100" />
-          <HeartIcon className="h-9 w-9 hoverEffect p-2 hover:text-red-600 hover:-red-100" />
+          <div className="flex items-center">
+            {hasLiked ? (
+              <HeartIconFilled
+                className="h-9 w-9 hoverEffect p-2 text-red-600 hover:-red-100"
+                onClick={likePost}
+              />
+            ) : (
+              <HeartIcon
+                className="h-9 w-9 hoverEffect p-2 hover:text-red-600 hover:-red-100"
+                onClick={likePost}
+              />
+            )}
+            {likes.length > 0 && <span className={`${hasLiked && "text-red-500"} text-sm select-none`}>{likes.length}</span>}
+          </div>
           <ShareIcon className="h-9 w-9 hoverEffect p-2 hover:text-sky-500 hover:bg-sky-100" />
           <ChartBarIcon className="h-9 w-9 hoverEffect p-2 hover:text-sky-500 hover:bg-sky-100" />
         </div>
