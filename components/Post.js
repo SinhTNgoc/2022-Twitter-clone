@@ -65,7 +65,8 @@ const Post = ({ post }) => {
   const handleDeletePost = async () => {
     if (window.confirm("Are you sure you want to delete this post?")) {
       await deleteDoc(doc(db, "posts", post.id));
-      await deleteObject(ref(storage, `posts/${post.id}/image`));
+      if (post.data().image)
+        await deleteObject(ref(storage, `posts/${post.id}/image`));
     }
   };
 
@@ -99,8 +100,8 @@ const Post = ({ post }) => {
           </p>
           <div className="w-full relative">
             <img
-              src={post?.data()?.image}
-              alt="user-image"
+              src={post?.data()?.image || ""}
+              alt=""
               layout="fill"
               className="cursor-pointer rounded-2xl hover:brightness-110"
             />

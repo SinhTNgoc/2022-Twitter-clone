@@ -1,4 +1,5 @@
 import { SearchIcon } from "@heroicons/react/outline";
+import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 import News from "./News";
 
@@ -18,11 +19,21 @@ const Widgets = ({ newsResults, randomUserFollow }) => {
           />
         </div>
       </div>
-      <div className="text-gray-700 space-y-3 rounded-xl bg-gray-100 p-5 mt-3 w-[90%] xl:w-[90%]">
+      <div className="text-gray-700 space-y-3 rounded-xl bg-gray-100 p-2 mt-3 w-[90%] xl:w-[90%]">
         <h4 className="font-bold text-xl">What&apos;s happening?</h4>
-        {newsResults.slice(0, articleNumber).map((article) => (
-          <News key={article.title} article={article} />
-        ))}
+        <AnimatePresence>
+          {newsResults.slice(0, articleNumber).map((article) => (
+            <motion.div
+              key={article.title}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1 }}
+            >
+              <News article={article} />
+            </motion.div>
+          ))}
+        </AnimatePresence>
         <button
           className="text-blue-400 pl-4 pb-3 hover:text-blue-300"
           onClick={() => setArticleNumber((prev) => prev + 4)}
@@ -30,29 +41,38 @@ const Widgets = ({ newsResults, randomUserFollow }) => {
           Show more
         </button>
       </div>
-      <div className="text-gray-700 space-y-3 rounded-xl bg-gray-100 p-5 mt-3 w-[90%] xl:w-[90%]">
+      <div className="text-gray-700 space-y-3 rounded-xl bg-gray-100 p-2 mt-3 w-[90%] xl:w-[90%]">
         <h4 className="font-bold text-xl">Who to follow</h4>
-        {randomUserFollow.slice(0, userNumber).map((user) => (
-          <div
-            key={user.name.last}
-            className="flex items-center space-y-0.5 cursor-pointer  hover:bg-gray-200 transition duration-200"
-          >
-            <img
-              src={user.picture.thumbnail}
-              alt={user.name.last}
-              className="w-[50px] h-[50px] rounded-full mr-3 "
-            />
-            <div className="truncate leading-5">
-              <h4 className="font-bold text-[16px] hover:underline">{user.login.username}</h4>
-              <h5 className="text-xs font-medium text-gray-500">
-                {user.name.first + " " + user.name.last}
-              </h5>
-            </div>
-            <button className="ml-auto bg-blue-400 text-white rounded-full px-3.5 py-1.5">
-              Follow
-            </button>
-          </div>
-        ))}
+        <AnimatePresence>
+          {randomUserFollow.slice(0, userNumber).map((user) => (
+            <motion.div
+              key={user.name.last}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1 }}
+            >
+              <div className="flex items-center space-y-0.5 cursor-pointer p-3 hover:bg-gray-200 transition duration-500 ease-out rounded-2xl">
+                <img
+                  src={user.picture.thumbnail}
+                  alt={user.name.last}
+                  className="w-[50px] h-[50px] rounded-full mr-3 "
+                />
+                <div className="truncate leading-5">
+                  <h4 className="font-bold text-[16px] hover:underline">
+                    {user.login.username}
+                  </h4>
+                  <h5 className="text-xs font-medium text-gray-500">
+                    {user.name.first + " " + user.name.last}
+                  </h5>
+                </div>
+                <button className="ml-auto bg-blue-400 text-white rounded-full px-3.5 py-1.5">
+                  Follow
+                </button>
+              </div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
         <button
           className="text-blue-400 pl-4 pb-3 hover:text-blue-300"
           onClick={() => setUserNumber((prev) => prev + 4)}
