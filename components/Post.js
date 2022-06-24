@@ -23,12 +23,13 @@ import Moment from "react-moment";
 import { db, storage } from "../firebase";
 
 import { useRecoilState } from "recoil";
-import { modalState } from "../Atom/modalAtom";
+import { modalState, postIdState } from "../Atom/modalAtom";
 
 const Post = ({ post }) => {
   const [likes, setLikes] = useState([]);
   const [hasLiked, setHasLiked] = useState(false);
   const [open, setOpen] = useRecoilState(modalState);
+  const [postId, setPostId] = useRecoilState(postIdState);
 
   const { data: session } = useSession();
 
@@ -79,7 +80,7 @@ const Post = ({ post }) => {
       <div className="w-[45px]">
         <img
           src={post?.data()?.userImg}
-          alt="user-image"
+          alt={`${post?.data()?.userImg && "user-image"}`}
           className="w-[45px] h-[45px] rounded-full object-cover cursor-pointer hover:brightness-90"
         />
       </div>
@@ -114,7 +115,14 @@ const Post = ({ post }) => {
         <div className="flex justify-between text-gray-500 py-2">
           <ChatAltIcon
             className="h-9 w-9 hoverEffect p-2 hover:text-sky-500 hover:bg-sky-100"
-            onClick={() => setOpen(!open)}
+            onClick={() => {
+              if (!session) {
+                signIn();
+              } else {
+                setPostId(post.id);
+                setOpen(!open);
+              }
+            }}
           />
           {session?.user?.uid === post.data().id && (
             <TrashIcon
