@@ -1,3 +1,4 @@
+import { async } from "@firebase/util";
 import {
   ChartBarIcon,
   ChatAltIcon,
@@ -14,18 +15,18 @@ import {
   collection,
   deleteDoc,
 } from "firebase/firestore";
+import { deleteObject, ref } from "firebase/storage";
 import { signIn, useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 
 import Moment from "react-moment";
-import { db } from "../firebase";
+import { db, storage } from "../firebase";
 
 const Post = ({ post }) => {
   const [likes, setLikes] = useState([]);
   const [hasLiked, setHasLiked] = useState(false);
 
   const { data: session } = useSession();
-  console.log(session);
 
   useEffect(() => {
     const unsubcribe = onSnapshot(
@@ -42,32 +43,37 @@ const Post = ({ post }) => {
     );
   }, [likes, session?.user?.uid]);
 
-  console.log({ hasLiked });
-
   const likePost = async () => {
-    if(session) {
+    if (session) {
       if (!hasLiked) {
         await setDoc(doc(db, "posts", post.id, "likes", session?.user?.uid), {
           username: session?.user?.username,
         });
       } else {
-        await deleteDoc(doc(db, "posts", post.id, "likes", session?.user?.uid), {
-          username: session?.user?.username,
-        });
+        await deleteDoc(
+          doc(db, "posts", post.id, "likes", session?.user?.uid),
+          {
+            username: session?.user?.username,
+          }
+        );
       }
-    }else {
-      signIn("/auth/sigin")
+    } else {
+      signIn();
     }
-    
   };
+
+  const handleDeletePost = async () => {
+    if (window.confirm("Are you sure you want to delete this post?")) {
+      await deleteDoc(doc(db, "posts", post.id));
+      await deleteObject(ref(storage, `posts/${post.id}/image`));
+    }
+  };
+
   return (
     <div className="p-3 flex space-x-3 cursor-pointer border-b border-gray-200">
       <div className="w-[45px]">
         <img
-          src={
-            post?.data()?.userImg ||
-            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_QNkOSdhUIABFqXCeR_YvGF-IAU4T7waAoQ&usqp=CAU"
-          }
+          src={post?.data()?.userImg}
           alt="user-image"
           className="w-[45px] h-[45px] rounded-full object-cover cursor-pointer hover:brightness-90"
         />
@@ -82,7 +88,7 @@ const Post = ({ post }) => {
               @{post?.data()?.username} -{" "}
             </span>
             <span className="text-sm sm:text-[15px] hover:underline">
-              <Moment fromNow>{post?.data()?.timestamp.toDate()}</Moment>
+              <Moment fromNow>{post?.data()?.timestamp?.toDate()}</Moment>
             </span>
           </div>
           <DotsHorizontalIcon className="hoverEffect h-10 w-10 hover:bg-sky-100 hover:text-sky-500" />
@@ -102,7 +108,12 @@ const Post = ({ post }) => {
         </div>
         <div className="flex justify-between text-gray-500 py-2">
           <ChatAltIcon className="h-9 w-9 hoverEffect p-2 hover:text-sky-500 hover:bg-sky-100" />
-          <TrashIcon className="h-9 w-9 hoverEffect p-2 hover:text-red-600 hover:bg-red-100" />
+          {session?.user?.uid === post.data().id && (
+            <TrashIcon
+              className="h-9 w-9 hoverEffect p-2 hover:text-red-600 hover:bg-red-100"
+              onClick={handleDeletePost}
+            />
+          )}
           <div className="flex items-center">
             {hasLiked ? (
               <HeartIconFilled
@@ -115,7 +126,13 @@ const Post = ({ post }) => {
                 onClick={likePost}
               />
             )}
-            {likes.length > 0 && <span className={`${hasLiked && "text-red-500"} text-sm select-none`}>{likes.length}</span>}
+            {likes.length > 0 && (
+              <span
+                className={`${hasLiked && "text-red-500"} text-sm select-none`}
+              >
+                {likes.length}
+              </span>
+            )}
           </div>
           <ShareIcon className="h-9 w-9 hoverEffect p-2 hover:text-sky-500 hover:bg-sky-100" />
           <ChartBarIcon className="h-9 w-9 hoverEffect p-2 hover:text-sky-500 hover:bg-sky-100" />
