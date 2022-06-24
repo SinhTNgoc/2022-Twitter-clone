@@ -22,9 +22,13 @@ import { useEffect, useState } from "react";
 import Moment from "react-moment";
 import { db, storage } from "../firebase";
 
+import { useRecoilState } from "recoil";
+import { modalState } from "../Atom/modalAtom";
+
 const Post = ({ post }) => {
   const [likes, setLikes] = useState([]);
   const [hasLiked, setHasLiked] = useState(false);
+  const [open, setOpen] = useRecoilState(modalState);
 
   const { data: session } = useSession();
 
@@ -108,7 +112,10 @@ const Post = ({ post }) => {
           </div>
         </div>
         <div className="flex justify-between text-gray-500 py-2">
-          <ChatAltIcon className="h-9 w-9 hoverEffect p-2 hover:text-sky-500 hover:bg-sky-100" />
+          <ChatAltIcon
+            className="h-9 w-9 hoverEffect p-2 hover:text-sky-500 hover:bg-sky-100"
+            onClick={() => setOpen(!open)}
+          />
           {session?.user?.uid === post.data().id && (
             <TrashIcon
               className="h-9 w-9 hoverEffect p-2 hover:text-red-600 hover:bg-red-100"
