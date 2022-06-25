@@ -24,8 +24,9 @@ import { db, storage } from "../firebase";
 
 import { useRecoilState } from "recoil";
 import { modalState, postIdState } from "../Atom/modalAtom";
+import { useRouter } from "next/router";
 
-const Post = ({ post }) => {
+const Post = ({ post, id }) => {
   const [likes, setLikes] = useState([]);
   const [comments, setComments] = useState([]);
   const [hasLiked, setHasLiked] = useState(false);
@@ -33,22 +34,22 @@ const Post = ({ post }) => {
   const [postId, setPostId] = useRecoilState(postIdState);
 
   const { data: session } = useSession();
+  const router = useRouter();
 
   useEffect(() => {
     const unsubcribe = onSnapshot(
-      collection(db, "posts", post.id, "likes"),
+      collection(db, "posts", id, "likes"),
       (snapshot) => {
         setLikes(snapshot.docs);
       }
     );
-  }, [post.id]);
+  }, [id]);
 
   useEffect(() => {
-    onSnapshot(collection(db, "posts", post.id, "comments"), (snapshot) => {
+    onSnapshot(collection(db, "posts", id, "comments"), (snapshot) => {
       setComments(snapshot.docs);
     });
-  }, [post.id]);
-  console.log(comments.length);
+  }, [id]);
 
   useEffect(() => {
     setHasLiked(
@@ -59,16 +60,13 @@ const Post = ({ post }) => {
   const likePost = async () => {
     if (session) {
       if (!hasLiked) {
-        await setDoc(doc(db, "posts", post.id, "likes", session?.user?.uid), {
+        await setDoc(doc(db, "posts", id, "likes", session?.user?.uid), {
           username: session?.user?.username,
         });
       } else {
-        await deleteDoc(
-          doc(db, "posts", post.id, "likes", session?.user?.uid),
-          {
-            username: session?.user?.username,
-          }
-        );
+        await deleteDoc(doc(db, "posts", id, "likes", session?.user?.uid), {
+          username: session?.user?.username,
+        });
       }
     } else {
       signIn();
@@ -77,9 +75,10 @@ const Post = ({ post }) => {
 
   const handleDeletePost = async () => {
     if (window.confirm("Are you sure you want to delete this post?")) {
-      await deleteDoc(doc(db, "posts", post.id));
-      if (post.data().image)
-        await deleteObject(ref(storage, `posts/${post.id}/image`));
+      await deleteDoc(doc(db, "posts", post?.id));
+      if (post?.data()?.image)
+        await deleteObject(ref(storage, `posts/${post?.id}/image`));
+      router.push("/");
     }
   };
 
@@ -114,7 +113,7 @@ const Post = ({ post }) => {
           <div className="w-[480px] h-[320px]">
             <img
               src={post?.data()?.image || ""}
-              alt=""
+              alt={`${post?.data()?.image && "post-img"}||""`}
               className="cursor-pointer h-[320px] w-full  rounded-2xl hover:brightness-110"
             />
           </div>
@@ -127,7 +126,7 @@ const Post = ({ post }) => {
                 if (!session) {
                   signIn();
                 } else {
-                  setPostId(post.id);
+                  setPostId(id);
                   setOpen(!open);
                 }
               }}
@@ -137,7 +136,7 @@ const Post = ({ post }) => {
             )}
           </div>
 
-          {session?.user?.uid === post.data().id && (
+          {session?.user?.uid === post?.data()?.id && (
             <TrashIcon
               className="h-9 w-9 hoverEffect p-2 hover:text-red-600 hover:bg-red-100"
               onClick={handleDeletePost}

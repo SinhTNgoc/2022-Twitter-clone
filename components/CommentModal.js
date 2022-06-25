@@ -38,8 +38,8 @@ const CommentModal = () => {
       userImg: session.user.image,
       timestamp: serverTimestamp(),
     });
-    setInputValue("");
     setOpen(false);
+    setInputValue("");
     router.push(`posts/${postId}`);
   };
 
