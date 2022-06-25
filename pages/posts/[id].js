@@ -5,13 +5,22 @@ import Sidebar from "../../components/Sidebar";
 import Widgets from "../../components/Widgets";
 import Post from "../../components/Post";
 import { useEffect, useState } from "react";
-import { collection, doc, onSnapshot } from "firebase/firestore";
+
+import {
+  collection,
+  doc,
+  onSnapshot,
+  orderBy,
+  query,
+} from "firebase/firestore";
 import { db } from "../../firebase";
+import Comment from "../../components/Comment";
 
 export default function PostPage({ newsResults, randomUserFollow }) {
   const router = useRouter();
   const { id } = router.query;
   const [post, setPost] = useState(null);
+  const [comments, setComments] = useState([]);
 
   const handleBackHomePage = () => {
     router.push("/");
@@ -23,6 +32,18 @@ export default function PostPage({ newsResults, randomUserFollow }) {
     });
   }, [id]);
 
+  //Get comments
+  useEffect(() => {
+    onSnapshot(
+      query(
+        collection(db, "posts", id, "comments"),
+        orderBy("timestamp", "desc")
+      ),
+      (snapshot) => {
+        setComments(snapshot.docs);
+      }
+    );
+  }, [id]);
 
   return (
     <div>
@@ -48,6 +69,11 @@ export default function PostPage({ newsResults, randomUserFollow }) {
             </h2>
           </div>
           <Post id={id} post={post} />
+          {comments &&
+            comments.length > 0 &&
+            comments.map((comment, index) => (
+              <Comment key={index} comment={comment} />
+            ))}
         </div>
 
         {/* Widgets */}
